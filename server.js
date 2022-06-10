@@ -18,11 +18,9 @@ let clients = [];
 io.on('connection', async(socket) => {
     clients.push(socket.id);
     console.log('a user connected');
-    socket.on('users', async()=>{
-        const users = clients.filter((id)=> id !== socket.id);
+    const users = clients.filter((id)=> id !== socket.id);
         console.log(users);
-        socket.emit('allUsers', users);
-    });
+    io.emit('allUsers', users);
     socket.on('msg', (msg)=>{console.log(msg);
         socket.to( msg.id).emit('newMsg', msg.msg);
         
@@ -32,14 +30,13 @@ io.on('connection', async(socket) => {
 
     socket.on("disconnecting", (reason) => {
         clients = clients.filter((id)=> id !== socket.id);
+        // clients.map((c)=>{
+            io.emit(('allUsers', clients));
+        // });
       });
 
 });
 
-io.on('users', async(socket)=>{
-    console.log(clients);
-    socket.emit('allUsers', clients);
-});
 
 
 server.listen(3020, () => {
